@@ -142,6 +142,23 @@ User getUserFromString(string line, char separator) {
     return user;
 }
 
+void validateUserLogin(vector<User> users, string login, string password, int &idUser) {
+    for (vector<User>::iterator it=users.begin(),
+            lastUser = users.end(); it!=lastUser; ++it) {
+        if(it->login == login) {
+            if (it->password == password){
+                idUser = it->idUser;
+                break;
+            } else {
+                idUser = 0;
+                break;
+            }
+        } else {
+            idUser = 0;
+        }
+    }
+}
+
 void printContact(Contact contact) {
     cout << contact.id << "|";
     cout << contact.name << "|";
@@ -340,94 +357,111 @@ int main() {
 
     char mainChoice;
     do {
-
         printMainMenu();
         cin >> mainChoice;
         switch(mainChoice) {
             case '1': {
-                readFromDB_contacts(file_contacts,"test.txt",contacts);
-
-        char loggedUserChoice;
-        do {
-            printMainMenuLoggedUser();
-            cin >> loggedUserChoice;
-            switch(loggedUserChoice) {
-            case '1': {
-                Contact contact = printContactAddForm();
-                if(contacts.empty()){
-                    contact.id = 1;
+                int loggedUserId = 0;
+                if (users.empty()) {
+                    system("cls");
+                    cout << "brak uzytkownikow w bazie, zarejestruj sie" << endl;
+                    Sleep(1500);
                 } else {
-                    vector<Contact>::iterator lastContact = contacts.end();
-                    lastContact--;
-                    contact.id = lastContact->id + 1;
+                    string login, password;
+                    cout << "login:";
+                    cin >> login;
+                    cout << "hasło:";
+                    cin >> password;
+                    validateUserLogin(users,login,password,loggedUserId);
                 }
-                contacts.push_back(contact);
-                writeToDB_contacts(file_contacts,"test.txt",contacts);
 
-            }
-            break;
-            case '2': {
-                system("cls");
-                string name;
-                cout << "wyszukaj kontakt po imieniu: ";
-                cin.ignore();
-                getline(cin,name);
-                findContactsByName(contacts,name);
-                cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
-                getchar();
-            }
-                break;
-            case '3': {
-                system("cls");
-                string surname;
-                cout << "wyszukaj kontakt po nazwisku: ";
-                cin.ignore();
-                getline(cin,surname);
-                findContactsBySurname(contacts,surname);
-                cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
-                getchar();
-            }
-                break;
-            case '4':
-                system("cls");
-                printContacts(contacts);
-                cin.ignore();
-                cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
-                getchar();
-                break;
-            case '5': {
-                system("cls");
-                int id;
-                cout << "usuwanie kontatku, podaj ID: ";
-                cin.ignore();
-                cin >> id;
-                deleteContactById(contacts,id);
-                writeToDB_contacts(file_contacts,"test.txt",contacts);
-                cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
-                getchar();
-            }
-                break;
-            case '6': {
-                system("cls");
-                int id;
-                cout << "edycja kontaktu, podaj ID: ";
-                cin.ignore();
-                cin >> id;
-                cin.ignore();
-                editContactById(contacts,id);
-                writeToDB_contacts(file_contacts,"test.txt",contacts);
-                cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
-                getchar();
-            }
-                break;
-            case '9':
-                break;
-            default:
-                cout << "nieprawidˆowy wyb¢r!" << endl;
-                Sleep(1500);
-                break;
-            }
-        } while(loggedUserChoice != '9');
+
+
+                if(loggedUserId) {
+                    readFromDB_contacts(file_contacts,"test.txt",contacts);
+
+                    char loggedUserChoice;
+                    do {
+                        printMainMenuLoggedUser();
+                        cin >> loggedUserChoice;
+                        switch(loggedUserChoice) {
+                        case '1': {
+                            Contact contact = printContactAddForm();
+                            if(contacts.empty()){
+                                contact.id = 1;
+                            } else {
+                                vector<Contact>::iterator lastContact = contacts.end();
+                                lastContact--;
+                                contact.id = lastContact->id + 1;
+                            }
+                            contacts.push_back(contact);
+                            writeToDB_contacts(file_contacts,"test.txt",contacts);
+
+                        }
+                        break;
+                        case '2': {
+                            system("cls");
+                            string name;
+                            cout << "wyszukaj kontakt po imieniu: ";
+                            cin.ignore();
+                            getline(cin,name);
+                            findContactsByName(contacts,name);
+                            cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
+                            getchar();
+                        }
+                            break;
+                        case '3': {
+                            system("cls");
+                            string surname;
+                            cout << "wyszukaj kontakt po nazwisku: ";
+                            cin.ignore();
+                            getline(cin,surname);
+                            findContactsBySurname(contacts,surname);
+                            cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
+                            getchar();
+                        }
+                            break;
+                        case '4':
+                            system("cls");
+                            printContacts(contacts);
+                            cin.ignore();
+                            cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
+                            getchar();
+                            break;
+                        case '5': {
+                            system("cls");
+                            int id;
+                            cout << "usuwanie kontatku, podaj ID: ";
+                            cin.ignore();
+                            cin >> id;
+                            deleteContactById(contacts,id);
+                            writeToDB_contacts(file_contacts,"test.txt",contacts);
+                            cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
+                            getchar();
+                        }
+                            break;
+                        case '6': {
+                            system("cls");
+                            int id;
+                            cout << "edycja kontaktu, podaj ID: ";
+                            cin.ignore();
+                            cin >> id;
+                            cin.ignore();
+                            editContactById(contacts,id);
+                            writeToDB_contacts(file_contacts,"test.txt",contacts);
+                            cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
+                            getchar();
+                        }
+                            break;
+                        case '9':
+                            break;
+                        default:
+                            cout << "nieprawidˆowy wyb¢r!" << endl;
+                            Sleep(1500);
+                            break;
+                        }
+                    } while(loggedUserChoice != '9');
+                } // if loggedUserID
             }
             break;
             case '2': {
