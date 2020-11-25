@@ -251,7 +251,9 @@ void writeToDB(fstream &file, string path, vector<Contact> &contacts) {
 
 int main() {
     vector<Contact> contacts;
+    vector<User> users;
     fstream file;
+    fstream file_users;
 
     readFromDB(file,"test.txt",contacts);
 
