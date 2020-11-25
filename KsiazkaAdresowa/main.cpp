@@ -11,6 +11,11 @@ struct Contact {
     string name = "", surname = "", phoneNumber = "", email = "", address = "";
 };
 
+struct User {
+    int idUser = 0;
+    string login = "", password = "";
+};
+
 string IntToStr(int intNumber) {
     ostringstream ss;
     ss << intNumber;
