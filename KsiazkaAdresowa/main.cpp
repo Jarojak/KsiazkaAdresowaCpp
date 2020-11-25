@@ -32,6 +32,13 @@ int StrToInt(string stringNumber) {
 
 void printMainMenu() {
     system("cls");
+    cout << "1. Logowanie" << endl;
+    cout << "2. Rejestracja" << endl;
+    cout << "9. Zakoäcz program" << endl;
+}
+
+void printMainMenuLoggedUser() {
+    system("cls");
     cout << "1. Dodaj adresata" << endl;
     cout << "2. Wyszukaj po imieniu" << endl;
     cout << "3. Wyszukaj po nazwisku" << endl;
@@ -99,6 +106,39 @@ Contact getContactFromString(string line, char separator) {
         }
     }
     return contact;
+}
+
+void assignUserFields(User &user, string field, int fieldNumber) {
+    switch(fieldNumber) {
+    case 0:
+        user.idUser = StrToInt(field);
+        break;
+    case 1:
+        user.login = field;
+        break;
+    case 2:
+        user.password = field;
+        break;
+    default:
+        break;
+    }
+}
+
+User getUserFromString(string line, char separator) {
+    User user;
+    int lineLength = line.length();
+    string temp = "";
+    int separatorCount = 0;
+    for(int i = 0; i<lineLength; i++) {
+        if(line[i]==separator) {
+            assignuserFields(user,temp,separatorCount);
+            temp = "";
+            separatorCount++;
+        } else {
+            temp += line[i];
+        }
+    }
+    return user;
 }
 
 void printContact(Contact contact) {
@@ -193,26 +233,6 @@ void editContactById(vector<Contact> &contacts, int id) {
     }
 }
 
-void readFromFile(fstream &file, vector<Contact> &contacts) {
-    string line;
-    while(getline(file,line)) {
-        contacts.push_back( getContactFromString(line,'|') );
-    }
-}
-
-void writeToFile(fstream &file, vector<Contact> &contacts) {
-    for (vector<Contact>::iterator it=contacts.begin(),
-            lastContact = contacts.end(); it!=lastContact; ++it) {
-        file << it->id << "|";
-        file << it->name << "|";
-        file << it->surname << "|";
-        file << it->phoneNumber << "|";
-        file << it->email << "|";
-        file << it->address << "|";
-        file << endl;
-    }
-}
-
 int fileOpen(fstream &file, string path, int mode) {
     if(mode == 1) {
         file.open(path,ios::in);
@@ -229,21 +249,80 @@ int fileOpen(fstream &file, string path, int mode) {
     }
 }
 
-void readFromDB(fstream &file, string path, vector<Contact> &contacts) {
+// reading/writing to file contacts
+void readFromFile_contacts(fstream &file, vector<Contact> &contacts) {
+    string line;
+    while(getline(file,line)) {
+        contacts.push_back( getContactFromString(line,'|') );
+    }
+}
+
+void writeToFile_contacts(fstream &file, vector<Contact> &contacts) {
+    for (vector<Contact>::iterator it=contacts.begin(),
+            lastContact = contacts.end(); it!=lastContact; ++it) {
+        file << it->id << "|";
+        file << it->name << "|";
+        file << it->surname << "|";
+        file << it->phoneNumber << "|";
+        file << it->email << "|";
+        file << it->address << "|";
+        file << endl;
+    }
+}
+
+void readFromDB_contacts(fstream &file, string path, vector<Contact> &contacts) {
     if(fileOpen(file,path,1)==0) {
         cout << "bˆ¥d otwarcia pliku" << endl;
     } else {
-        readFromFile(file, contacts);
+        readFromFile_contacts(file, contacts);
 
         file.close();
     }
 }
 
-void writeToDB(fstream &file, string path, vector<Contact> &contacts) {
+void writeToDB_contacts(fstream &file, string path, vector<Contact> &contacts) {
     if(fileOpen(file,path,0)==0) {
         cout << "bˆ¥d otwarcia pliku" << endl;
     } else {
-        writeToFile(file, contacts);
+        writeToFile_contacts(file, contacts);
+
+        file.close();
+    }
+}
+
+// reading/writing to file users
+void readFromFile_users(fstream &file, vector<User> &users) {
+    string line;
+    while(getline(file,line)) {
+        users.push_back( getUserFromString(line,'|') );
+    }
+}
+
+void writeToFile_users(fstream &file, vector<User> &users) {
+    for (vector<User>::iterator it=users.begin(),
+            lastContact = users.end(); it!=lastContact; ++it) {
+        file << it->idUser << "|";
+        file << it->login << "|";
+        file << it->password << "|";
+        file << endl;
+    }
+}
+
+void readFromDB_users(fstream &file, string path, vector<User> &users) {
+    if(fileOpen(file,path,1)==0) {
+        cout << "bˆ¥d otwarcia pliku" << endl;
+    } else {
+        readFromFile_users(file, users);
+
+        file.close();
+    }
+}
+
+void writeToDB_users(fstream &file, string path, vector<User> &users) {
+    if(fileOpen(file,path,0)==0) {
+        cout << "bˆ¥d otwarcia pliku" << endl;
+    } else {
+        writeToFile_users(file, users);
 
         file.close();
     }
@@ -255,11 +334,11 @@ int main() {
     fstream file_contacts;
     fstream file_users;
 
-    readFromDB(file_contacts,"test.txt",contacts);
+    readFromDB_contacts(file_contacts,"test.txt",contacts);
 
     char choice;
     do {
-        printMainMenu();
+        printMainMenuLoggedUser();
         cin >> choice;
         switch(choice) {
         case '1': {
@@ -272,7 +351,7 @@ int main() {
                 contact.id = lastContact->id + 1;
             }
             contacts.push_back(contact);
-            writeToDB(file_contacts,"test.txt",contacts);
+            writeToDB_contacts(file_contacts,"test.txt",contacts);
 
         }
         break;
@@ -312,7 +391,7 @@ int main() {
             cin.ignore();
             cin >> id;
             deleteContactById(contacts,id);
-            writeToDB(file_contacts,"test.txt",contacts);
+            writeToDB_contacts(file_contacts,"test.txt",contacts);
             cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
             getchar();
         }
@@ -325,7 +404,7 @@ int main() {
             cin >> id;
             cin.ignore();
             editContactById(contacts,id);
-            writeToDB(file_contacts,"test.txt",contacts);
+            writeToDB_contacts(file_contacts,"test.txt",contacts);
             cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
             getchar();
         }
