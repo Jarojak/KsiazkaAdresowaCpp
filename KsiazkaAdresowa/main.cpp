@@ -252,10 +252,10 @@ void writeToDB(fstream &file, string path, vector<Contact> &contacts) {
 int main() {
     vector<Contact> contacts;
     vector<User> users;
-    fstream file;
+    fstream file_contacts;
     fstream file_users;
 
-    readFromDB(file,"test.txt",contacts);
+    readFromDB(file_contacts,"test.txt",contacts);
 
     char choice;
     do {
@@ -272,7 +272,7 @@ int main() {
                 contact.id = lastContact->id + 1;
             }
             contacts.push_back(contact);
-            writeToDB(file,"test.txt",contacts);
+            writeToDB(file_contacts,"test.txt",contacts);
 
         }
         break;
@@ -312,7 +312,7 @@ int main() {
             cin.ignore();
             cin >> id;
             deleteContactById(contacts,id);
-            writeToDB(file,"test.txt",contacts);
+            writeToDB(file_contacts,"test.txt",contacts);
             cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
             getchar();
         }
@@ -325,7 +325,7 @@ int main() {
             cin >> id;
             cin.ignore();
             editContactById(contacts,id);
-            writeToDB(file,"test.txt",contacts);
+            writeToDB(file_contacts,"test.txt",contacts);
             cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
             getchar();
         }
