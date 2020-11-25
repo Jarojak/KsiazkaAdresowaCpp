@@ -45,7 +45,7 @@ void printMainMenuLoggedUser() {
     cout << "4. Wy˜wietl wszystkich adresat¢w" << endl;
     cout << "5. Usuä adresata" << endl;
     cout << "6. Edytuj adresata" << endl;
-    cout << "9. Zakoäcz program" << endl;
+    cout << "9. Wyloguj" << endl;
 }
 
 Contact printContactAddForm() {
@@ -333,6 +333,7 @@ int main() {
     vector<User> users;
     fstream file_contacts;
     fstream file_users;
+
 
     readFromDB_contacts(file_contacts,"test.txt",contacts);
 
