@@ -7,7 +7,7 @@
 using namespace std;
 
 struct Contact {
-    int id = 0;
+    int id = 0, idUser = 0;
     string name = "", surname = "", phoneNumber = "", email = "", address = "";
 };
 
