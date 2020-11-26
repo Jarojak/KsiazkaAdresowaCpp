@@ -3,3 +3,5 @@
 *.cbp
 bin/
 obj/
+test_users.txt
+test.txt
