@@ -159,6 +159,20 @@ void validateUserLogin(vector<User> users, string login, string password, int &i
     }
 }
 
+void printUser(User user) {
+    cout << user.idUser << "|";
+    cout << user.login << "|";
+    cout << user.password << "|";
+    cout << endl;
+}
+
+void printUsers(vector<User> users) {
+    for (vector<User>::iterator it=users.begin(),
+            lastUser = users.end(); it!=lastUser; ++it) {
+        printUser(*it);
+    }
+}
+
 void printContact(Contact contact) {
     cout << contact.id << "|";
     cout << contact.name << "|";
@@ -362,8 +376,8 @@ int main() {
         switch(mainChoice) {
             case '1': {
                 int loggedUserId = 0;
+                system("cls");
                 if (users.empty()) {
-                    system("cls");
                     cout << "brak uzytkownikow w bazie, zarejestruj sie" << endl;
                     Sleep(1500);
                 } else {
@@ -461,6 +475,10 @@ int main() {
                             break;
                         }
                     } while(loggedUserChoice != '9');
+                } else {
+                    system("cls");
+                    cout << "brak użytkownika w bazie, lub błędne hasło!" << endl;
+                    Sleep(1500);
                 } // if loggedUserID
             }
             break;
