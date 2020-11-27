@@ -483,8 +483,18 @@ int main() {
             }
             break;
             case '2': {
+                    string login, password, passwordAcknowledge;
                     cin.ignore();
-                    cout << "REJESTRACJA!" << endl;
+                    cout << "Rejestracja nowego użytkonika" << endl;
+                    cout << "Login: ";
+                    cin >> login;
+                    cout << "haslo: ";
+                    cin >> password;
+                    cout << "powtorz haslo: "
+                    cin >> passwordAcknowledge;
+
+
+
                     cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
                     getchar();
                 }
