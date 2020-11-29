@@ -466,6 +466,36 @@ int main() {
                         getchar();
                     }
                     break;
+                    case '7': {
+                        system("cls");
+                        cin.ignore();
+                        string passwordOld, passwordNew, passwordNewAck;
+                        cout << "edycja hasla";
+                        cout << "podaj hasło: ";
+                        cin >> passwordOld;
+                        if(users[loggedUserId-1].password == passwordOld) {
+                            cout << "podaj nowe hasło: ";
+                            cin >> passwordNew;
+                            cout << "powtórz nowe hasło: ";
+                            cin >> passwordNewAck;
+                            if (passwordNew == passwordNewAck) {
+                                users[loggedUserId-1].password = passwordNew;
+                                writeToDB_users(file_users,"test_users.txt",users);
+                                readFromDB_users(file_users,"test_users.txt",users);
+                            } else {
+                                cout << "hasla nie są identyczne";
+                                cin.ignore();
+                                getchar();
+                                break;
+                            }
+                        } else {
+                            cout << "haslo nieprawidlowe";
+                            cin.ignore();
+                            getchar();
+                            break;
+                        }
+                    }
+                    break;
                     case '9':
                         break;
                     default:
