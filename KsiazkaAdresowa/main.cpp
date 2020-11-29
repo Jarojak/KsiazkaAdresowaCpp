@@ -73,18 +73,21 @@ void assignContactFields(Contact &contact, string field, int fieldNumber) {
         contact.id = StrToInt(field);
         break;
     case 1:
-        contact.name = field;
+        contact.idUser = StrToInt(field);
         break;
     case 2:
-        contact.surname = field;
+        contact.name = field;
         break;
     case 3:
-        contact.phoneNumber = field;
+        contact.surname = field;
         break;
     case 4:
-        contact.email = field;
+        contact.phoneNumber = field;
         break;
     case 5:
+        contact.email = field;
+        break;
+    case 6:
         contact.address = field;
         break;
     default:
@@ -190,28 +193,28 @@ void printContacts(vector<Contact> contacts) {
     }
 }
 
-void findContactsByName(vector<Contact> contacts, string name) {
+void findContactsByName(vector<Contact> contacts, string name, int loggedUserId) {
     for (vector<Contact>::iterator it=contacts.begin(),
             lastContact = contacts.end(); it!=lastContact; ++it) {
-        if(it->name == name) {
+        if(it->name == name && it->idUser == loggedUserId) {
             printContact(*it);
         }
     }
 }
 
-void findContactsBySurname(vector<Contact> contacts, string surname) {
+void findContactsBySurname(vector<Contact> contacts, string surname, int loggedUserId) {
     for (vector<Contact>::iterator it=contacts.begin(),
             lastContact = contacts.end(); it!=lastContact; ++it) {
-        if(it->surname == surname) {
+        if(it->surname == surname && it->idUser == loggedUserId) {
             printContact(*it);
         }
     }
 }
 
-void deleteContactById(vector<Contact> &contacts, int id) {
+void deleteContactById(vector<Contact> &contacts, int id, int loggedUserId) {
     for (vector<Contact>::iterator it=contacts.begin(),
             lastContact = contacts.end(); it!=lastContact; ++it) {
-        if(it->id == id) {
+        if(it->id == id && it->idUser == loggedUserId) {
             cout << "usun¥† kontakt t/n?" << endl;
             printContact(*it);
             cin.ignore();
@@ -222,10 +225,10 @@ void deleteContactById(vector<Contact> &contacts, int id) {
     }
 }
 
-void editContactById(vector<Contact> &contacts, int id) {
+void editContactById(vector<Contact> &contacts, int id, int loggedUserId) {
     for (vector<Contact>::iterator it=contacts.begin(),
             lastContact = contacts.end(); it!=lastContact; ++it) {
-        if(it->id == id) {
+        if(it->id == id && it->idUser == loggedUserId) {
             cout << "kontakt do edycji: " << endl;
             printContact(*it);
             cout << "wybierz dane do edycji:" << endl;
@@ -282,10 +285,14 @@ int fileOpen(fstream &file, string path, int mode) {
 }
 
 // reading/writing to file contacts
-void readFromFile_contacts(fstream &file, vector<Contact> &contacts) {
+void readFromFile_contacts(fstream &file, vector<Contact> &contacts, int loggedUserId) {
     string line;
+    Contact contact;
     while(getline(file,line)) {
-        contacts.push_back( getContactFromString(line,'|') );
+        contact = getContactFromString(line,'|');
+        if (contact.idUser == loggedUserId) {
+            contacts.push_back( contact );
+        }
     }
 }
 
@@ -293,6 +300,7 @@ void writeToFile_contacts(fstream &file, vector<Contact> &contacts) {
     for (vector<Contact>::iterator it=contacts.begin(),
             lastContact = contacts.end(); it!=lastContact; ++it) {
         file << it->id << "|";
+        file << it->idUser << "|";
         file << it->name << "|";
         file << it->surname << "|";
         file << it->phoneNumber << "|";
@@ -302,11 +310,11 @@ void writeToFile_contacts(fstream &file, vector<Contact> &contacts) {
     }
 }
 
-void readFromDB_contacts(fstream &file, string path, vector<Contact> &contacts) {
+void readFromDB_contacts(fstream &file, string path, vector<Contact> &contacts, int loggedUserId) {
     if(fileOpen(file,path,1)==0) {
         cout << "bˆ¥d otwarcia pliku" << endl;
     } else {
-        readFromFile_contacts(file, contacts);
+        readFromFile_contacts(file, contacts, loggedUserId);
 
         file.close();
     }
@@ -391,7 +399,7 @@ int main() {
 
 
             if(loggedUserId) {
-                readFromDB_contacts(file_contacts,"test.txt",contacts);
+                readFromDB_contacts(file_contacts,"test.txt",contacts,loggedUserId);
 
                 char loggedUserChoice;
                 do {
@@ -402,10 +410,12 @@ int main() {
                         Contact contact = printContactAddForm();
                         if(contacts.empty()) {
                             contact.id = 1;
+                            contact.idUser = loggedUserId;
                         } else {
                             vector<Contact>::iterator lastContact = contacts.end();
                             lastContact--;
                             contact.id = lastContact->id + 1;
+                            contact.idUser = loggedUserId;
                         }
                         contacts.push_back(contact);
                         writeToDB_contacts(file_contacts,"test.txt",contacts);
@@ -418,7 +428,7 @@ int main() {
                         cout << "wyszukaj kontakt po imieniu: ";
                         cin.ignore();
                         getline(cin,name);
-                        findContactsByName(contacts,name);
+                        findContactsByName(contacts,name,loggedUserId);
                         cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
                         getchar();
                     }
@@ -429,7 +439,7 @@ int main() {
                         cout << "wyszukaj kontakt po nazwisku: ";
                         cin.ignore();
                         getline(cin,surname);
-                        findContactsBySurname(contacts,surname);
+                        findContactsBySurname(contacts,surname,loggedUserId);
                         cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
                         getchar();
                     }
@@ -447,7 +457,7 @@ int main() {
                         cout << "usuwanie kontatku, podaj ID: ";
                         cin.ignore();
                         cin >> id;
-                        deleteContactById(contacts,id);
+                        deleteContactById(contacts,id,loggedUserId);
                         writeToDB_contacts(file_contacts,"test.txt",contacts);
                         cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
                         getchar();
@@ -460,7 +470,7 @@ int main() {
                         cin.ignore();
                         cin >> id;
                         cin.ignore();
-                        editContactById(contacts,id);
+                        editContactById(contacts,id,loggedUserId);
                         writeToDB_contacts(file_contacts,"test.txt",contacts);
                         cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
                         getchar();
