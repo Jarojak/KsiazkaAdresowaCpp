@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <stdio.h>
 
 using namespace std;
 
@@ -145,11 +146,26 @@ User getUserFromString(string line, char separator) {
     return user;
 }
 
+int getIdFromString(string line, char separator) {
+    int Id = 0;
+    int lineLength = line.length();
+    string temp = "";
+    for(int i = 0; i<lineLength; i++) {
+        if(line[i]==separator) {
+            Id = StrToInt(temp);
+            break;
+        } else {
+            temp += line[i];
+        }
+    }
+    return Id;
+}
+
 void validateUserLogin(vector<User> users, string login, string password, int &idUser) {
     for (vector<User>::iterator it=users.begin(),
             lastUser = users.end(); it!=lastUser; ++it) {
         if(it->login == login) {
-            if (it->password == password){
+            if (it->password == password) {
                 idUser = it->idUser;
                 break;
             } else {
@@ -218,7 +234,7 @@ void deleteContactById(vector<Contact> &contacts, int id, int loggedUserId) {
             cout << "usun¥† kontakt t/n?" << endl;
             printContact(*it);
             cin.ignore();
-            if(getchar()=='t'){
+            if(getchar()=='t') {
                 contacts.erase(it);
             }
         }
@@ -241,7 +257,7 @@ void editContactById(vector<Contact> &contacts, int id, int loggedUserId) {
             char choice;
             cin >> choice;
             cin.ignore();
-            switch(choice){
+            switch(choice) {
             case '1':
                 getline(cin,it->name);
                 break;
@@ -330,6 +346,53 @@ void writeToDB_contacts(fstream &file, string path, vector<Contact> &contacts) {
     }
 }
 
+void RewriteToDB_constacts(string path, vector<Contact> &contacts, int Id) {
+    fstream fileToRead;
+    //otwieramy plik do odczytu
+    if(fileOpen(fileToRead,path,1)==0) {
+        cout << "bˆ¥d otwarcia pliku" << endl;
+    }
+
+    fstream fileToWrite;
+    //otwieramy nowy plik do zapisu
+    string pathTemp = "testTemp.txt";
+    if(fileOpen(fileToWrite,pathTemp,0)==0) {
+        cout << "bˆ¥d otwarcia pliku" << endl;
+    }
+
+    string line = "";
+    int currentId = 0;
+    while(getline(fileToRead,line)) {
+        currentId = getIdFromString(line,'|');
+        if (currentId == Id) {
+            // sprawdzamy czy byla edycja czy usuniecie
+            vector<Contact>::iterator lastIteratorPosition;
+            for (vector<Contact>::iterator it=contacts.begin(),
+                    lastContact = contacts.end(); it!=lastContact; ++it) {
+                if(it->id == Id) { // jak edycja to jest id w wektorze i zapisujemy go do pliku
+                    fileToWrite << it->id << "|";
+                    fileToWrite << it->idUser << "|";
+                    fileToWrite << it->name << "|";
+                    fileToWrite << it->surname << "|";
+                    fileToWrite << it->phoneNumber << "|";
+                    fileToWrite << it->email << "|";
+                    fileToWrite << it->address << "|";
+                    fileToWrite << endl;
+                }
+            }
+        } else {
+            fileToWrite << line << endl;
+        }
+    }
+
+    fileToRead.close();
+    fileToWrite.close();
+
+    remove(path.c_str());
+    rename(pathTemp.c_str(),path.c_str());
+
+}
+
 // reading/writing to file users
 void readFromFile_users(fstream &file, vector<User> &users) {
     string line;
@@ -366,6 +429,21 @@ void writeToDB_users(fstream &file, string path, vector<User> &users) {
 
         file.close();
     }
+}
+
+int readLastIdFromDB(fstream &file, string path) {
+    int id;
+    if(fileOpen(file,path,1)==0) {
+        cout << "bˆ¥d otwarcia pliku" << endl;
+    } else {
+        string line;
+        while(getline(file,line)) {
+            id = getIdFromString(line,'|');
+        }
+
+        file.close();
+    }
+    return id;
 }
 
 int main() {
@@ -412,13 +490,24 @@ int main() {
                             contact.id = 1;
                             contact.idUser = loggedUserId;
                         } else {
-                            vector<Contact>::iterator lastContact = contacts.end();
-                            lastContact--;
-                            contact.id = lastContact->id + 1;
+                            //vector<Contact>::iterator lastContact = contacts.end();
+                            //lastContact--;
+                            //contact.id = lastContact->id + 1;
+                            contact.id = readLastIdFromDB(file_contacts,"test.txt") + 1;
                             contact.idUser = loggedUserId;
                         }
                         contacts.push_back(contact);
-                        writeToDB_contacts(file_contacts,"test.txt",contacts);
+                        //writeToDB_contacts(file_contacts,"test.txt",contacts);
+                        fileOpen(file_contacts,"test.txt",2);
+                        file_contacts << contact.id << "|";
+                        file_contacts << contact.idUser << "|";
+                        file_contacts << contact.name << "|";
+                        file_contacts << contact.surname << "|";
+                        file_contacts << contact.phoneNumber << "|";
+                        file_contacts << contact.email << "|";
+                        file_contacts << contact.address << "|";
+                        file_contacts << endl;
+                        file_contacts.close();
 
                     }
                     break;
@@ -458,7 +547,8 @@ int main() {
                         cin.ignore();
                         cin >> id;
                         deleteContactById(contacts,id,loggedUserId);
-                        writeToDB_contacts(file_contacts,"test.txt",contacts);
+                        //writeToDB_contacts(file_contacts,"test.txt",contacts);
+                        RewriteToDB_constacts("test.txt",contacts,id);
                         cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
                         getchar();
                     }
@@ -471,7 +561,8 @@ int main() {
                         cin >> id;
                         cin.ignore();
                         editContactById(contacts,id,loggedUserId);
-                        writeToDB_contacts(file_contacts,"test.txt",contacts);
+                        //writeToDB_contacts(file_contacts,"test.txt",contacts);
+                        RewriteToDB_constacts("test.txt",contacts,id);
                         cout << "naci˜nij dowolny klawisz, aby wr¢ci† do menu gˆ¢wnego";
                         getchar();
                     }
@@ -507,6 +598,7 @@ int main() {
                     }
                     break;
                     case '9':
+                        contacts.clear();
                         break;
                     default:
                         cout << "nieprawidˆowy wyb¢r!" << endl;
