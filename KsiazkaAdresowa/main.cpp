@@ -582,7 +582,6 @@ int main() {
                             if (passwordNew == passwordNewAck) {
                                 users[loggedUserId-1].password = passwordNew;
                                 writeToDB_users(file_users,"test_users.txt",users);
-                                readFromDB_users(file_users,"test_users.txt",users);
                             } else {
                                 cout << "hasla nie są identyczne";
                                 cin.ignore();
@@ -689,8 +688,6 @@ int main() {
                 user.password = password;
                 users.push_back(user);
                 writeToDB_users(file_users,"test_users.txt",users);
-
-                readFromDB_users(file_users,"test_users.txt",users);
             }
 
         }
